@@ -3,6 +3,11 @@ from typing import TypedDict
 from travel_agent.models.task import Task
 
 
+class InputState(TypedDict):
+    # Original request
+    user_request: str
+
+
 class TravelAgentState(TypedDict):
     # Original request
     user_request: str
