@@ -9,7 +9,10 @@ llm = ChatOpenAI(model="gpt-5-nano")
 
 
 def get_request(state: TravelAgentState) -> dict[str, str]:
-
+    """
+    Extract the travel destination from the user's request
+    and return it as a state update.
+    """
     user_request = state["user_request"]
 
     structured_llm = llm.with_structured_output(ParsedRequest)
