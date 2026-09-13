@@ -12,3 +12,11 @@ Input:
 
 Parsed state:
 `destination: Japan`
+
+### Current Flow
+
+The current graph implements the first step of the agent:
+
+`User Request → Parse Request → State`
+
+The Parse Request node uses structured LLM output to extract the travel destination and store it in the graph state.
