@@ -22,6 +22,8 @@ class TravelAgentState(TypedDict):
     max_activities_per_day: int
 
     # Planning and execution
+    can_plan: bool
+    missing_information: list[str]
     plan: list[Task]
 
     # Itinerary
