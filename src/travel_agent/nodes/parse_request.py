@@ -18,13 +18,21 @@ def get_request(state: TravelAgentState) -> dict[str, str]:
     structured_llm = llm.with_structured_output(ParsedRequest)
 
     request_prompt = f"""
-        Analyze the user request and extract the destination.
+        Analyze the user request and extract the following travel information:
 
-        The destination can be a city, country, or other geographic place.
+        - Destination: the city, country, or geographic place the user wants to visit.
+        - Travelers: the number of people traveling.
+        - Trip Duration: the amount of time the trip should take
+        - Budget: the amount of money available for the trip
 
         User request: {user_request}
-        """
+    """
 
     parsed_request = structured_llm.invoke(request_prompt)
 
-    return {"destination": parsed_request.destination}
+    return {
+        "destination": parsed_request.destination,
+        "travelers": parsed_request.travelers,
+        "trip_duration": parsed_request.trip_duration,
+        "budget": parsed_request.budget,
+    }

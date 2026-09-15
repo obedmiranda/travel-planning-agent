@@ -12,6 +12,6 @@ workflow.add_edge("parse_request", END)
 graph = workflow.compile()
 
 # user_request en el invoke es el mismo que definimos en la estructura del state
-result = graph.invoke({"user_request": "Plan my trip to Japan"})
+result = graph.invoke({"user_request": "Plan a trip to Japan"})
 
 print(result)

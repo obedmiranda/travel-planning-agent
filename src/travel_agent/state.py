@@ -15,9 +15,9 @@ class TravelAgentState(TypedDict):
     # Parsed request
     destination: str
     required_cities: list[str]
-    travelers: int
-    trip_duration: int
-    budget: float
+    travelers: int | None
+    trip_duration: int | None
+    budget: float | None
     interests: list[str]
     max_activities_per_day: int
 
