@@ -22,3 +22,7 @@ The current graph implements the first step of the agent:
 The Parse Request node uses structured LLM output to extract the travel destination and store it in the graph state.
 
 Next step: expand request parsing to capture additional travel constraints such as travelers, trip duration, and budget.
+
+### Current planning flow
+
+The planner evaluates whether the available information is sufficient to fulfill the user's request before continuing with trip planning.
