@@ -1,28 +1,71 @@
 # travel-planning-agent
-An adaptive travel planning agent built with LangGraph that creates, evaluates, and dynamically replans itineraries based on user goals and constraints
+
+An adaptive travel planning agent built with LangGraph that creates, evaluates, and dynamically replans itineraries based on user goals and constraints.
 
 ## Current Progress
 
-The agent can currently parse a natural-language travel request and extract the destination into the graph state using structured LLM output.
+The agent currently implements the initial request parsing and planning-readiness stages of the travel planning workflow.
+
+It can:
+
+- Parse a natural-language travel request into structured graph state.
+- Extract the destination, number of travelers, trip duration, and budget using structured LLM output.
+- Determine whether enough information is available to begin planning.
+- Require destination, travelers, trip duration, and budget when the user requests a full trip plan.
+- Route execution conditionally based on the planner's decision.
+- Pause execution using a human-in-the-loop interrupt when required information is missing.
+- Preserve execution state using LangGraph checkpointing.
 
 Example:
 
 Input:
-`Plan my trip to Japan`
+
+`Plan a trip to Japan`
 
 Parsed state:
-`destination: Japan`
 
-### Current Flow
+```text
+destination: Japan
+travelers: None
+trip_duration: None
+budget: None
+```
 
-The current graph implements the first step of the agent:
+Planner decision:
 
-`User Request → Parse Request → State`
+```text
+can_plan: False
+missing_information:
+  - travelers
+  - trip duration
+  - budget
+```
 
-The Parse Request node uses structured LLM output to extract the travel destination and store it in the graph state.
+## Current Flow
 
-Next step: expand request parsing to capture additional travel constraints such as travelers, trip duration, and budget.
+```text
+User Request
+     ↓
+Parse Request
+     ↓
+Planner
+     ↓
+Can plan?
+  /        \
+Yes        No
+ ↓          ↓
+END    Request Information
+             ↓
+          Interrupt
+             ⏸
+```
 
-### Current planning flow
+The **Parse Request** node extracts available travel information and stores it in the graph state.
 
-The planner evaluates whether the available information is sufficient to fulfill the user's request before continuing with trip planning.
+The **Planner** evaluates whether the available information is sufficient for the user's request. For full trip-planning requests, destination, number of travelers, trip duration, and budget are required before planning can continue.
+
+If required information is missing, the graph routes to the **Request Information** node, which uses a LangGraph interrupt to pause execution while preserving the current state.
+
+## Next Step
+
+Resume an interrupted execution with user-provided information, update the structured travel state, and route the updated state back through the Planner.
