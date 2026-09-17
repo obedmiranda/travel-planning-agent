@@ -30,6 +30,18 @@ def planner(
         Determine whether the available information is sufficient to
         begin creating a reasonable travel plan.
 
+        RULES:
+        When the user is asking to plan a trip, the following information
+        is required before planning can begin:
+        - Destination
+        - Number of travelers
+        - Trip duration
+        - Budget
+
+        These required fields must not be inferred or assumed.
+        If any of them are missing, can_plan must be false and the missing
+        fields must be included in missing_information.
+
         Do not require every possible travel preference.
         Missing optional preferences should not prevent planning when
         reasonable assumptions can be made.
