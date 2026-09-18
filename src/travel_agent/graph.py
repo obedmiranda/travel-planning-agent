@@ -1,6 +1,7 @@
 from langchain_core.runnables import RunnableConfig
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
+from langgraph.types import Command
 
 from travel_agent.nodes.parse_request import get_request
 from travel_agent.nodes.planner import planner
@@ -39,25 +40,13 @@ workflow.add_conditional_edges(
 )
 
 
-# graph = workflow.compile()
-
 checkpointer = InMemorySaver()
 
 graph = workflow.compile(checkpointer=checkpointer)
 
 config: RunnableConfig = {"configurable": {"thread_id": "test-1"}}
 
-# user_request en el invoke es el mismo que definimos en la estructura del state
-# result = graph.invoke({"user_request": "Plan a trip to Japan"})
-# result = graph.invoke(
-#     {"user_request": "Plan a 7-day trip to Japan for two people with a $5,000 budget"}
-# )
-
-# result = graph.invoke({"user_request": "Give me some activity ideas in Japan"})
-
-# result = graph.invoke({"user_request": "Plan a trip to Japan"})
-# print(json.dumps(result, indent=2))
-
 result = graph.invoke({"user_request": "Plan a trip to Japan"}, config=config)
 
+resumed_result = graph.invoke(Command(resume="2 people, 7 days, $5000"), config=config)
 print(result)

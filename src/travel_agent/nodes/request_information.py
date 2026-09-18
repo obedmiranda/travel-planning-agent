@@ -8,3 +8,4 @@ def request_information(state: TravelAgentState):
 
     missing_information = state["missing_information"]
     answer = interrupt({"missing_information": missing_information})
+    print("RESUMED ANSWER:", answer)
