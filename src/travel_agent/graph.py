@@ -28,7 +28,7 @@ workflow.add_node("request_information", request_information)
 # Edges setup
 workflow.add_edge(START, "parse_request")
 workflow.add_edge("parse_request", "planner")
-
+workflow.add_edge("request_information", "planner")
 
 workflow.add_conditional_edges(
     "planner",
@@ -50,3 +50,4 @@ result = graph.invoke({"user_request": "Plan a trip to Japan"}, config=config)
 
 resumed_result = graph.invoke(Command(resume="2 people, 7 days, $5000"), config=config)
 print(result)
+print(resumed_result)
