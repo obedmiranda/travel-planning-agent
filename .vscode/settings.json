@@ -6,6 +6,7 @@
         "reportUnknownArgumentType": "none",
         "reportAttributeAccessIssue": "none",
         "reportUnusedVariable": "none",
-        "reportUnusedImport": "none"
+        "reportUnusedImport": "none",
+        "reportReturnType": "none"
     }
 }
