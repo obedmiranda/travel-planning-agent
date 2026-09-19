@@ -31,6 +31,12 @@ def task_planner(state: TravelAgentState) -> dict[str, list[Task]]:
         - Do not create tasks for information already available in the travel context.
         - Keep the plan focused and minimal.
         - Create between 3 and 6 tasks.
+        - Each task must include a concise search query that can be used
+        by a web search tool to execute that research task.
+        - The search query should include relevant travel context when needed,
+        such as destination, number of travelers, trip duration, and budget.
+        - Do not include a specific year in the search query unless the user
+        provided one in their request.
 
         USER GOAL:
         {user_request}

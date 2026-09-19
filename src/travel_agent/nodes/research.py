@@ -21,9 +21,18 @@ if __name__ == "__main__":
         "can_plan": True,
         "missing_information": [],
         "plan": [
-            Task(description="Research hotels"),
-            Task(description="Research transportation"),
-            Task(description="Research attractions"),
+            Task(
+                description="Research hotels",
+                search_query="Japan hotels for 2 travelers 7 nights",
+            ),
+            Task(
+                description="Research transportation",
+                search_query="Japan transportation costs Tokyo Kyoto Osaka",
+            ),
+            Task(
+                description="Research attractions",
+                search_query="Japan attractions Tokyo Kyoto Osaka admission prices",
+            ),
         ],
         "itinerary": {},
         "evaluation": {},

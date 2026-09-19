@@ -72,4 +72,5 @@ print(f"Can plan: {resumed_result['can_plan']}")
 print("\n--- PLAN ---")
 for index, task in enumerate(resumed_result["plan"], start=1):
     print(f"{index}. {task.description}")
+    print(f"   Query: {task.search_query}")
     print(f"   Status: {task.status}")
