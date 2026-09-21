@@ -1,5 +1,6 @@
 from travel_agent.models.task import Task
 from travel_agent.state import TravelAgentState
+from travel_agent.tools.web_search import web_search
 
 
 def research(state: TravelAgentState):
@@ -7,6 +8,7 @@ def research(state: TravelAgentState):
 
     for task in plan:
         if task.status == "pending":
+            results = web_search(task.search_query)
             print("FOUND:", task.description)
             break
 
