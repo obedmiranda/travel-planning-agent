@@ -1,6 +1,37 @@
+from langchain_openai import ChatOpenAI
+
+from travel_agent.models.search_result import SearchResult
 from travel_agent.models.task import Task
 from travel_agent.state import TravelAgentState
 from travel_agent.tools.web_search import web_search
+
+llm = ChatOpenAI(model="gpt-5-nano")
+
+
+def synthesize_research(
+    task_description: str, search_results: list[SearchResult,]
+) -> str:
+
+    research_prompt = f"""
+        You are a travel research assistant.
+
+        RESEARCH TASK:
+        {task_description}
+
+        SEARCH RESULTS:
+        {search_results}
+
+        TASK:
+        Analyze the search results and produce a concise conclusion
+        that directly answers the research task.
+
+        Base your conclusion only on the provided search results.
+        Do not invent information that is not supported by them.
+    """
+
+    response = llm.invoke(research_prompt)
+
+    return str(response.content)
 
 
 def research(state: TravelAgentState):
@@ -9,7 +40,18 @@ def research(state: TravelAgentState):
     for task in plan:
         if task.status == "pending":
             results = web_search(task.search_query)
-            print("FOUND:", task.description)
+
+            research_result = synthesize_research(
+                task.description,
+                results,
+            )
+
+            task.result = research_result
+            task.status = "completed"
+
+            print("TASK:", task.description)
+            print("RESULT:", research_result)
+
             break
 
 
