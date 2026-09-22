@@ -20,6 +20,13 @@ def route_after_planner(state: TravelAgentState) -> str:
     return "missing_information"
 
 
+def route_after_research(state: TravelAgentState) -> str:
+    for task in state["plan"]:
+        if task.status == "pending":
+            return "continue_research"
+    return "research_completed"
+
+
 workflow = StateGraph(TravelAgentState, input_schema=InputState)
 
 # Nodes setup
@@ -41,9 +48,18 @@ workflow.add_conditional_edges(
         "missing_information": "request_information",
     },
 )
+
 workflow.add_edge("request_information", "planner")
 workflow.add_edge("task_planner", "research")
-workflow.add_edge("research", END)
+
+workflow.add_conditional_edges(
+    "research",
+    route_after_research,
+    {
+        "continue_research": "research",
+        "research_completed": END,
+    },
+)
 
 
 checkpointer = InMemorySaver()

@@ -1,4 +1,5 @@
 from langchain_openai import ChatOpenAI
+from serpapi.exceptions import HTTPError
 
 from travel_agent.models.search_result import SearchResult
 from travel_agent.models.task import Task
@@ -39,7 +40,16 @@ def research(state: TravelAgentState):
 
     for task in plan:
         if task.status == "pending":
-            results = web_search(task.search_query)
+            try:
+                results = web_search(task.search_query)
+            except HTTPError as error:
+                task.status = "failed"
+                task.result = f"Research failed: {error}"
+
+                print("TASK FAILED:", task.description)
+                print("ERROR:", error)
+
+                break
 
             research_result = synthesize_research(
                 task.description,
