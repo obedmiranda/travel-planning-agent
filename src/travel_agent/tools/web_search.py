@@ -25,7 +25,7 @@ def web_search(query: str) -> list[SearchResult]:
         search_result = SearchResult(
             title=result["title"],
             url=result["link"],
-            snippet=result["snippet"],
+            snippet=result.get("snippet", ""),
         )
 
         search_results.append(search_result)

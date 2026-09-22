@@ -1,8 +1,9 @@
 from langchain_core.runnables import RunnableConfig
 from langgraph.checkpoint.memory import InMemorySaver
-from langgraph.graph import END, START, StateGraph
+from langgraph.graph import START, StateGraph
 from langgraph.types import Command
 
+from travel_agent.nodes.build_itinerary import build_itinerary
 from travel_agent.nodes.parse_request import get_request
 from travel_agent.nodes.planner import planner
 from travel_agent.nodes.request_information import request_information
@@ -35,6 +36,7 @@ workflow.add_node("planner", planner)
 workflow.add_node("request_information", request_information)
 workflow.add_node("task_planner", task_planner)
 workflow.add_node("research", research)
+workflow.add_node("build_itinerary", build_itinerary)
 
 # Edges setup
 workflow.add_edge(START, "parse_request")
@@ -57,7 +59,7 @@ workflow.add_conditional_edges(
     route_after_research,
     {
         "continue_research": "research",
-        "research_completed": END,
+        "research_completed": "build_itinerary",
     },
 )
 
