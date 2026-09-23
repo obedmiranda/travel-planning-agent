@@ -1,5 +1,7 @@
 from typing import TypedDict
 
+from travel_agent.models.evaluation import Evaluation
+from travel_agent.models.itinerary import Itinerary
 from travel_agent.models.task import Task
 
 
@@ -27,10 +29,10 @@ class TravelAgentState(TypedDict):
     plan: list[Task]
 
     # Itinerary
-    itinerary: dict  # type: ignore
+    itinerary: Itinerary
 
     # Evaluation
-    evaluation: dict  # type: ignore
+    evaluation: Evaluation
     replan_count: int
 
     # Final output

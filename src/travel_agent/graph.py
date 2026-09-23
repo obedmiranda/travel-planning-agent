@@ -4,8 +4,11 @@ from langgraph.graph import START, StateGraph
 from langgraph.types import Command
 
 from travel_agent.nodes.build_itinerary import build_itinerary
+from travel_agent.nodes.evaluator import evaluator
+from travel_agent.nodes.finalize import finalize
 from travel_agent.nodes.parse_request import get_request
 from travel_agent.nodes.planner import planner
+from travel_agent.nodes.replanner import replanner
 from travel_agent.nodes.request_information import request_information
 from travel_agent.nodes.research import research
 from travel_agent.nodes.task_planner import task_planner
@@ -28,6 +31,15 @@ def route_after_research(state: TravelAgentState) -> str:
     return "research_completed"
 
 
+def route_after_evaluator(state: TravelAgentState) -> str:
+    evaluation = state["evaluation"]
+
+    if evaluation.valid:
+        return "valid"
+
+    return "invalid"
+
+
 workflow = StateGraph(TravelAgentState, input_schema=InputState)
 
 # Nodes setup
@@ -37,6 +49,9 @@ workflow.add_node("request_information", request_information)
 workflow.add_node("task_planner", task_planner)
 workflow.add_node("research", research)
 workflow.add_node("build_itinerary", build_itinerary)
+workflow.add_node("evaluator", evaluator)
+workflow.add_node("replanner", replanner)
+workflow.add_node("finalize", finalize)
 
 # Edges setup
 workflow.add_edge(START, "parse_request")
@@ -60,6 +75,16 @@ workflow.add_conditional_edges(
     {
         "continue_research": "research",
         "research_completed": "build_itinerary",
+    },
+)
+workflow.add_edge("build_itinerary", "evaluator")
+
+workflow.add_conditional_edges(
+    "evaluator",
+    route_after_evaluator,
+    {
+        "valid": "finalize",
+        "invalid": "replanner",
     },
 )
 
