@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 
-from travel_agent.models.itinerary import Itinerary
+from travel_agent.models.replanning_decision import ReplanningDecision
 from travel_agent.state import TravelAgentState
 
 load_dotenv()
@@ -26,7 +26,7 @@ def replanner(state: TravelAgentState) -> dict[str, object]:
         for task in plan
     )
 
-    structured_llm = llm.with_structured_output(Itinerary)
+    structured_llm = llm.with_structured_output(ReplanningDecision)
 
     replan_prompt = f"""
         You are responsible for revising a travel itinerary that failed validation.
@@ -47,22 +47,48 @@ def replanner(state: TravelAgentState) -> dict[str, object]:
         {research_context}
 
         TASK:
-        Revise the current itinerary so that it fixes the validation violations.
+        Determine whether the validation violations can be fixed
+        while keeping the itinerary realistic and consistent with
+        the available research.
 
-        Preserve parts of the itinerary that do not need to change.
-        Use the available research when making changes.
+        If the constraints can realistically be satisfied:
+        - Return status="revised".
+        - Return a revised itinerary.
+        - Preserve parts that do not need to change.
+        - All costs must remain realistic and expressed in USD.
 
-        All estimated costs must be expressed in USD.
-        The total estimated cost must not exceed ${budget} USD.
-        The itinerary must contain exactly {trip_duration} days.
+        If the constraints cannot realistically be satisfied:
+        - Return status="unsatisfiable".
+        - Do not invent unrealistic costs just to satisfy the constraints.
+        - Do not reduce real travel, lodging, food, or transportation
+          costs to zero simply to fit the budget.
+        - Explain why the constraints cannot be satisfied in reason.
     """
 
-    revised_itinerary = structured_llm.invoke(replan_prompt)
+    decision = structured_llm.invoke(replan_prompt)
 
     print(f"\n=== REPLAN ATTEMPT {replan_count} ===")
-    print(revised_itinerary)
+    print(decision)
+
+    if decision.status == "unsatisfiable":
+        return {
+            "replan_count": replan_count,
+            "replanning_failed": True,
+            "replanning_failure_reason": decision.reason,
+        }
+
+    if decision.itinerary is None:
+        return {
+            "replan_count": replan_count,
+            "replanning_failed": True,
+            "replanning_failure_reason": (
+                "Replanner did not produce a revised itinerary."
+            ),
+        }
 
     return {
-        "itinerary": revised_itinerary,
+        "itinerary": decision.itinerary,
         "replan_count": replan_count,
+        "replanning_failed": False,
+        "replanning_failure_reason": None,
     }

@@ -45,6 +45,13 @@ def route_after_evaluator(state: TravelAgentState) -> str:
     return "invalid"
 
 
+def route_after_replanner(state: TravelAgentState) -> str:
+    if state["replanning_failed"]:
+        return "unsatisfiable"
+
+    return "revised"
+
+
 workflow = StateGraph(
     TravelAgentState,
     input_schema=InputState,
@@ -98,7 +105,15 @@ workflow.add_conditional_edges(
     },
 )
 
-workflow.add_edge("replanner", "evaluator")
+workflow.add_conditional_edges(
+    "replanner",
+    route_after_replanner,
+    {
+        "revised": "evaluator",
+        "unsatisfiable": "finalize",
+    },
+)
+
 workflow.add_edge("finalize", END)
 
 # Persistence
@@ -122,28 +137,7 @@ result = graph.invoke(
 
 resumed_result = graph.invoke(
     Command(
-        resume="2 people, 7 days, $5000",
+        resume="2 people, 7 days, $100",
     ),
     config=config,
 )
-
-
-# print("\n--- INITIAL STATE ---")
-# print(f"Destination: {result['destination']}")
-# print(f"Travelers: {result['travelers']}")
-# print(f"Trip duration: {result['trip_duration']}")
-# print(f"Budget: {result['budget']}")
-# print(f"Can plan: {result['can_plan']}")
-
-# print("\n--- RESUMED STATE ---")
-# print(f"Destination: {resumed_result['destination']}")
-# print(f"Travelers: {resumed_result['travelers']}")
-# print(f"Trip duration: {resumed_result['trip_duration']}")
-# print(f"Budget: ${resumed_result['budget']}")
-# print(f"Can plan: {resumed_result['can_plan']}")
-
-# print("\n--- PLAN ---")
-# for index, task in enumerate(resumed_result["plan"], start=1):
-#     print(f"{index}. {task.description}")
-#     print(f"   Query: {task.search_query}")
-#     print(f"   Status: {task.status}")
