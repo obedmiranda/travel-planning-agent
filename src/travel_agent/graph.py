@@ -28,19 +28,27 @@ def route_after_research(state: TravelAgentState) -> str:
     for task in state["plan"]:
         if task.status == "pending":
             return "continue_research"
+
     return "research_completed"
 
 
 def route_after_evaluator(state: TravelAgentState) -> str:
     evaluation = state["evaluation"]
+    replan_count = state.get("replan_count", 0)
 
     if evaluation.valid:
         return "valid"
 
+    if replan_count >= 3:
+        return "max_replans"
+
     return "invalid"
 
 
-workflow = StateGraph(TravelAgentState, input_schema=InputState)
+workflow = StateGraph(
+    TravelAgentState,
+    input_schema=InputState,
+)
 
 # Nodes setup
 workflow.add_node("parse_request", get_request)
@@ -77,6 +85,7 @@ workflow.add_conditional_edges(
         "research_completed": "build_itinerary",
     },
 )
+
 workflow.add_edge("build_itinerary", "evaluator")
 
 workflow.add_conditional_edges(
@@ -85,24 +94,36 @@ workflow.add_conditional_edges(
     {
         "valid": "finalize",
         "invalid": "replanner",
+        "max_replans": "finalize",
     },
 )
 
+workflow.add_edge("replanner", "evaluator")
 workflow.add_edge("finalize", END)
 
+# Persistence
 checkpointer = InMemorySaver()
 
 graph = workflow.compile(checkpointer=checkpointer)
 
-config: RunnableConfig = {"configurable": {"thread_id": "test-1"}}
+# Test execution
+config: RunnableConfig = {
+    "configurable": {
+        "thread_id": "test-1",
+    }
+}
 
 result = graph.invoke(
-    {"user_request": "Plan a trip to Japan"},
+    {
+        "user_request": "Plan a trip to Japan",
+    },
     config=config,
 )
 
 resumed_result = graph.invoke(
-    Command(resume="2 people, 7 days, $5000"),
+    Command(
+        resume="2 people, 7 days, $5000",
+    ),
     config=config,
 )
 
