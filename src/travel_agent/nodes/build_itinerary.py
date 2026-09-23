@@ -39,9 +39,29 @@ def build_itinerary(state: TravelAgentState) -> dict[str, Itinerary]:
         Build a feasible day-by-day itinerary using the travel context
         and the provided research.
 
+        COST RULES:
+        For every day, estimate:
+        - accommodation_cost
+        - food_cost
+        - transportation_cost
+        - activities_cost
+
+        estimated_cost must equal the sum of those four cost categories.
+
+        Costs must represent the total cost for all travelers, not per person.
+
+        Do not omit necessary travel expenses merely to satisfy the budget.
+        Do not assign zero cost to accommodation, food, or transportation
+        unless the provided research clearly supports that cost.
+
+        Use realistic estimates based on the provided research.
+
         All estimated costs must be expressed in USD.
+
+        estimated_total_cost must equal the sum of the estimated_cost
+        of all itinerary days.
+
         The user's maximum total budget is ${budget} USD.
-        Return all daily estimated costs and the estimated total cost in USD.
     """
 
     itinerary = structured_llm.invoke(itinerary_prompt)

@@ -56,13 +56,36 @@ def replanner(state: TravelAgentState) -> dict[str, object]:
         - Return a revised itinerary.
         - Preserve parts that do not need to change.
         - All costs must remain realistic and expressed in USD.
+        - Costs must represent the total cost for all travelers,
+          not per person.
+
+        For every itinerary day, estimate:
+        - accommodation_cost
+        - food_cost
+        - transportation_cost
+        - activities_cost
+
+        estimated_cost must equal the sum of those four categories.
+
+        estimated_total_cost must equal the sum of estimated_cost
+        across all itinerary days.
+
+        Do not omit necessary travel expenses merely to satisfy
+        the budget.
+
+        Do not assign zero cost to accommodation, food, or
+        transportation unless the available research clearly
+        supports that cost.
+
+        Do not manipulate or invent unrealistically low costs
+        simply to pass validation.
 
         If the constraints cannot realistically be satisfied:
         - Return status="unsatisfiable".
-        - Do not invent unrealistic costs just to satisfy the constraints.
-        - Do not reduce real travel, lodging, food, or transportation
-          costs to zero simply to fit the budget.
-        - Explain why the constraints cannot be satisfied in reason.
+        - Return itinerary=None.
+        - Explain in reason why the constraints cannot be satisfied.
+        - Base that conclusion on the travel context and available
+          research.
     """
 
     decision = structured_llm.invoke(replan_prompt)

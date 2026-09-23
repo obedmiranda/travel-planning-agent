@@ -8,6 +8,7 @@ def finalize(state: TravelAgentState) -> dict[str, str]:
 
     replanning_failed = state.get("replanning_failed", False)
 
+    # Replanner determined that the constraints cannot be satisfied
     if replanning_failed:
         reason = state.get(
             "replanning_failure_reason",
@@ -21,6 +22,7 @@ def finalize(state: TravelAgentState) -> dict[str, str]:
 
         return {"final_response": final_response}
 
+    # Maximum replanning attempts reached
     if not evaluation.valid:
         violations = "\n".join(f"- {violation}" for violation in evaluation.violations)
 
@@ -36,6 +38,7 @@ def finalize(state: TravelAgentState) -> dict[str, str]:
 
         return {"final_response": final_response}
 
+    # Valid itinerary
     lines = [
         "TRAVEL ITINERARY",
         "=" * 50,
@@ -49,10 +52,18 @@ def finalize(state: TravelAgentState) -> dict[str, str]:
         for activity in day.activities:
             lines.append(f"• {activity}")
 
-        lines.append(
-            f"\nEstimated day cost: ${day.estimated_cost:,.2f} {itinerary.currency}"
+        lines.extend(
+            [
+                "",
+                "Cost breakdown:",
+                f"  Accommodation: ${day.accommodation_cost:,.2f}",
+                f"  Food:          ${day.food_cost:,.2f}",
+                f"  Transportation:${day.transportation_cost:,.2f}",
+                f"  Activities:    ${day.activities_cost:,.2f}",
+                f"  Day total:     ${day.estimated_cost:,.2f} {itinerary.currency}",
+                "",
+            ]
         )
-        lines.append("")
 
     lines.extend(
         [
