@@ -10,14 +10,12 @@ llm = ChatOpenAI(model="gpt-5-nano")
 
 
 def build_itinerary(state: TravelAgentState) -> dict[str, Itinerary]:
-
     plan = state["plan"]
     destination = state["destination"]
     travelers = state["travelers"]
     trip_duration = state["trip_duration"]
     budget = state["budget"]
 
-    plan = state["plan"]
     structured_llm = llm.with_structured_output(Itinerary)
 
     research_context = "\n\n".join(
@@ -32,7 +30,7 @@ def build_itinerary(state: TravelAgentState) -> dict[str, Itinerary]:
         Destination: {destination}
         Travelers: {travelers}
         Trip duration: {trip_duration}
-        Budget: {budget}
+        Budget: ${budget} USD
 
         RESEARCH:
         {research_context}
@@ -40,9 +38,15 @@ def build_itinerary(state: TravelAgentState) -> dict[str, Itinerary]:
         TASK:
         Build a feasible day-by-day itinerary using the travel context
         and the provided research.
-        """
+
+        All estimated costs must be expressed in USD.
+        The user's maximum total budget is ${budget} USD.
+        Return all daily estimated costs and the estimated total cost in USD.
+    """
 
     itinerary = structured_llm.invoke(itinerary_prompt)
+
     print("\n=== GENERATED ITINERARY ===")
     print(itinerary)
+
     return {"itinerary": itinerary}

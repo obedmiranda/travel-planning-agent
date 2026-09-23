@@ -11,3 +11,4 @@ class ItineraryDay(BaseModel):
 class Itinerary(BaseModel):
     days: list[ItineraryDay]
     estimated_total_cost: float
+    currency: str

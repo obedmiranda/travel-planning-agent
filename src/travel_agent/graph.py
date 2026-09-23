@@ -1,6 +1,6 @@
 from langchain_core.runnables import RunnableConfig
 from langgraph.checkpoint.memory import InMemorySaver
-from langgraph.graph import START, StateGraph
+from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command
 
 from travel_agent.nodes.build_itinerary import build_itinerary
@@ -88,6 +88,7 @@ workflow.add_conditional_edges(
     },
 )
 
+workflow.add_edge("finalize", END)
 
 checkpointer = InMemorySaver()
 
